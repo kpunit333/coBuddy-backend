@@ -4,7 +4,9 @@ import connectDB from './src/config/db.js';
 import authRoutes from './src/routes/authRoutes.js';
 
 dotenv.config();
-connectDB();
+
+const dbName = process.env.MONGO_DB_NAME!;
+connectDB(dbName);
 
 const app: Application = express();
 
