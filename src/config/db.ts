@@ -9,7 +9,6 @@ const connectDB = async (dbName: string): Promise<void> => {
     };    
     
     const conn = await mongoose.connect(mongoUri, connectionObj);
-    console.log(conn);
     
     console.log(`Nexus Database Connected: ${conn.connection.host}/${conn.connection.name}`);
   } catch (error) {

@@ -76,6 +76,8 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
 };
 
 export const login = async (req: Request, res: Response): Promise<void> => {
+  console.log(req.body);
+  
   try {
     const { emailid, password, username } = req.body as AuthRequestBody;
 

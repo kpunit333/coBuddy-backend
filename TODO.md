@@ -1,10 +1,7 @@
-# TODO: User Authentication Implementation
+# Task: Modify server.ts for localhost:5173 CORS + body parser
 
 ## Steps:
-- [x] 1. Install bcryptjs and jsonwebtoken packages
-- [x] 2. Create User model with username, fullname, lastname, emailid, password fields
-- [x] 3. Update token-generator.ts to generate access and refresh tokens
-- [x] 4. Implement signup (hash password) and login (compare hash, return tokens) in authController.ts
-
-## Status: Completed
-
+- [x] 1. Create TODO.md and get overview.
+- [x] 2. Install cors and @types/cors.
+- [x] 3. Edit server.ts: Add cors import/config, fix middleware order.
+- [x] 4. Restart/test server from localhost:5173. (Run `npm start` or `npx ts-node server.ts` to verify; test requests from frontend at localhost:5173).
