@@ -12,13 +12,13 @@ interface AuthRequestBody {
 
 export const signup = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { username, fullname, lastname, emailid, password } = req.body as AuthRequestBody;
+    const { username, fullname, emailid, password } = req.body as AuthRequestBody;
 
     // Validate required fields
-    if (!username || !fullname || !lastname || !emailid || !password) {
+    if (!username || !fullname || !emailid || !password) {
       res.status(400).json({ 
         success: false,
-        message: 'All fields are required: username, fullname, lastname, emailid, password' 
+        message: 'All fields are required: username, fullname, emailid, password' 
       });
       return;
     }
@@ -40,7 +40,6 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
     const user = await User.create({
       username: username.toLowerCase(),
       fullname,
-      lastname,
       emailid: emailid.toLowerCase(),
       password,
     });
@@ -59,7 +58,6 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
           id: user._id,
           username: user.username,
           fullname: user.fullname,
-          lastname: user.lastname,
           emailid: user.emailid,
         },
         accessToken: tokens.accessToken,
@@ -129,7 +127,6 @@ export const login = async (req: Request, res: Response): Promise<void> => {
           id: user._id,
           username: user.username,
           fullname: user.fullname,
-          lastname: user.lastname,
           emailid: user.emailid,
         },
         accessToken: tokens.accessToken,
