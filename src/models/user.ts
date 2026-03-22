@@ -4,10 +4,8 @@ import bcrypt from 'bcryptjs';
 export interface IUser extends Document {
   username: string;
   fullname: string;
-  emailid: string;
+  emailId: string;
   password: string;
-  googleId?: string;
-  isGuest: boolean;
   comparePassword(candidatePassword: string): Promise<boolean>;
 } 
 
@@ -25,29 +23,14 @@ const userSchema = new Schema<IUser>(
       required: [true, 'Full name is required'],
       trim: true,
     },
-    emailid: {
-      type: String,
-      required: [true, 'Email is required'],
-      unique: true,
-      trim: true,
-      lowercase: true,
-    },
-  password: {
+    password: {
       type: String,
       required: [true, 'Password is required'],
       minlength: 6,
       select: false,
-    },
-    googleId: {
-      type: String,
-      sparse: true, // Allows multiple nulls
-    },
-    isGuest: {
-      type: Boolean,
-      default: false,
+      default: null,
     },
   },
-
   {
     timestamps: true,
   }

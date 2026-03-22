@@ -26,13 +26,6 @@ export const generateRefreshToken = (payload: TokenPayload): string => {
   });
 };
 
-export const generateTokenPair = (payload: TokenPayload): TokenPair => {
-  return {
-    accessToken: generateAccessToken(payload),
-    refreshToken: generateRefreshToken(payload),
-  };
-};
-
 export const verifyAccessToken = (token: string): TokenPayload => {
   const accessTokenSecret = process.env.JWT_ACCESS_SECRET || 'access-secret-key';
   return jwt.verify(token, accessTokenSecret) as TokenPayload;
@@ -43,3 +36,9 @@ export const verifyRefreshToken = (token: string): TokenPayload => {
   return jwt.verify(token, refreshTokenSecret) as TokenPayload;
 };
 
+export const generateTokenPair = (payload: TokenPayload): TokenPair => {
+  return {
+    accessToken: generateAccessToken(payload),
+    refreshToken: generateRefreshToken(payload),
+  };
+};
