@@ -6,6 +6,7 @@ import authRoutes from './src/routes/authRoutes.js';
 import routes from './routeHandler.js';
 import router from './routeHandler.js';
 import routeHandler from './routeHandler.js';
+import cookieParser from 'cookie-parser';
 
 dotenv.config();
 
@@ -20,6 +21,7 @@ app.use(express.static('public'));
 
 // Middleware for parsing JSON
 app.use(express.json());
+app.use(cookieParser());
 
 const PROTOCOL = process.env.SERVER_PROTOCOL;
 const URL = process.env.SERVER_URL;

@@ -6,6 +6,8 @@ export interface IUser extends Document {
   fullname: string;
   emailid: string;
   password: string;
+  googleId?: string;
+  isGuest: boolean;
   comparePassword(candidatePassword: string): Promise<boolean>;
 } 
 
@@ -30,13 +32,22 @@ const userSchema = new Schema<IUser>(
       trim: true,
       lowercase: true,
     },
-    password: {
+  password: {
       type: String,
       required: [true, 'Password is required'],
       minlength: 6,
       select: false,
     },
+    googleId: {
+      type: String,
+      sparse: true, // Allows multiple nulls
+    },
+    isGuest: {
+      type: Boolean,
+      default: false,
+    },
   },
+
   {
     timestamps: true,
   }

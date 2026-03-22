@@ -1,7 +1,16 @@
-# Task: Modify server.ts for localhost:5173 CORS + body parser
+# Previous Task: CORS/Body Parser [Complete]
+
+## Previous Steps:
+- [x] All steps complete.
+
+# Task 2: Google OAuth with Arctic - Store tokens in Mongo OAuth table
 
 ## Steps:
-- [x] 1. Create TODO.md and get overview.
-- [x] 2. Install cors and @types/cors.
-- [x] 3. Edit server.ts: Add cors import/config, fix middleware order.
-- [x] 4. Restart/test server from localhost:5173. (Run `npm start` or `npx ts-node server.ts` to verify; test requests from frontend at localhost:5173).
+- [x] 1. Plan and create TODO.md.
+- [x] 2. Create src/models/OAuthTokens.ts model.
+- [x] 3. Edit src/models/user.ts (add googleId, isGuest).
+- [x] 4. Edit server.ts (added cookieParser for OAuth state; Arctic client in controller).
+- [x] 5. Edit src/controllers/authController.ts (add googleInit, googleCallback, guestLogin).
+- [x] 6. Edit src/routes/authRoutes.ts (add /google/init, /google/callback, /guest).
+- [ ] 7. Add .env vars (GOOGLE_OAUTH_CLIENT_ID, GOOGLE_CLIENT_SECRET).
+- [ ] 8. Test: npm run dev, visit /api/auth/google/login → callback → JWT.
