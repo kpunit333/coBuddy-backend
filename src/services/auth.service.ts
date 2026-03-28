@@ -14,7 +14,7 @@ interface AuthRequestBody {
 export const refreshTokens = async (req: Request, res: Response): Promise<void> => {
   const response = new ResponseBody();
   try {
-    const { refreshToken } = req.body;
+    const { refreshToken } = req.body;    
 
     if (!refreshToken) {
       response.setMessage('Refresh token required');
@@ -58,7 +58,9 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
   try {
     const { username, fullname, emailId, password } = req.body as AuthRequestBody;
     if (!username || !fullname || !emailId || !password) {
-      throw new Error('All fields required');
+      response.setMessage('All fields required');
+      res.status(400).json(response);
+      return;
     }
 
     const existingUser = await User.findOne({
@@ -66,7 +68,9 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
     }).session(session);
 
     if (existingUser) {
-      throw new Error('User exists');
+      response.setMessage('User with given email or username already exists');
+      res.status(400).json(response);
+      return;
     }
 
     const user = await User.create([{
@@ -116,19 +120,25 @@ export const login = async (req: Request, res: Response): Promise<void> => {
   try {
     const { emailId, password, username } = req.body as AuthRequestBody;
     if (!password || (!emailId && !username)) {
-      throw new Error('emailId/username and password required');
+      response.setMessage('EmailId/username and password required');
+      res.status(400).json(response);
+      return;
     }
 
     const query = emailId ? { emailId: emailId.toLowerCase() } : { username: username!.toLowerCase() };
     const user = await User.findOne(query).select('+password').session(session);
 
     if (!user) {
-      throw new Error('Invalid credentials');
+      response.setMessage('Invalid credentials');
+      res.status(400).json(response);
+      return;
     }
 
     const isPasswordMatch = await user.comparePassword(password);
     if (!isPasswordMatch) {
-      throw new Error('Invalid credentials');
+      response.setMessage('Invalid credentials');
+      res.status(400).json(response);
+      return;
     }
 
     const tokens = generateTokenPair({
@@ -143,8 +153,10 @@ export const login = async (req: Request, res: Response): Promise<void> => {
         fullname: user.fullname,
         emailId: user.emailId,
       },
-      accessToken: tokens.accessToken,
-      refreshToken: tokens.refreshToken,
+      tokens: {
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
+      }
     });
 
     response.setSuccess(true);
@@ -161,7 +173,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     console.error('Login Error:', error);
     
     response.setMessage(error.message || 'Server error');
-    res.status(401).json(response);
+    res.status(400).json(response);
 
   } finally {
     await session.endSession();
