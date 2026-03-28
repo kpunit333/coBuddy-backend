@@ -5,7 +5,7 @@ import { ResponseBody } from "../utils/response";
 export const getUsers = async (req: Request, res: Response): Promise<void> => {
     let response = new ResponseBody();
     try {
-        const users = await User.find({}, '-password'); // exclude password
+        const users = await User.find({}, '-password -createdAt -updatedAt');
 
         response.setData(users);
         response.setSuccess(true);
