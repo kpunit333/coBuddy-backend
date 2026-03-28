@@ -12,9 +12,6 @@ interface TokenPair {
   refreshToken: string;
 }
 
-console.log(env.JWT_SECRET_KEY);
-
-
 export const generateToken = (payload: TokenPayload, duration: number): string => {
   const tokenSecret = env.JWT_SECRET_KEY!;
   
