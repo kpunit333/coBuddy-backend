@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import { Request, Response } from 'express';
 import User from '../models/user.js';
-import { generateTokenPair } from '../utils/token-generator.js';
+import { generateTokenPair, verifyRefreshToken } from '../utils/token-generator.js';
 import { ResponseBody } from '../utils/response.js';
 
 interface AuthRequestBody {
@@ -10,6 +10,43 @@ interface AuthRequestBody {
   emailId?: string;
   password?: string;
 }
+
+export const refreshTokens = async (req: Request, res: Response): Promise<void> => {
+  const response = new ResponseBody();
+  try {
+    const { refreshToken } = req.body;
+
+    if (!refreshToken) {
+      response.setMessage('Refresh token required');
+      res.status(400).json(response);
+      return;
+    }
+
+    const payload = verifyRefreshToken(refreshToken);
+
+    const tokens = generateTokenPair({
+      userId: payload.userId,
+      emailId: payload.emailId,
+    });
+
+    response.setData({
+      tokens: {
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
+      }
+    });
+
+    response.setSuccess(true);
+    response.setMessage('Tokens refreshed');
+    res.status(200).json(response);
+
+  } catch (error) {
+
+    response.setMessage('Invalid refresh token');
+    res.status(401).json(response);
+    
+  }
+};
 
 export const signup = async (req: Request, res: Response): Promise<void> => {
 
