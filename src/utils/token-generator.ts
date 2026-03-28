@@ -1,8 +1,10 @@
 import jwt from 'jsonwebtoken';
+import { ACCESS_TOKEN_EXPIRY, REFRESH_TOKEN_EXPIRY } from '../config/constants';
+import { env } from '../config/env';
 
 interface TokenPayload {
   userId: string;
-  email: string;
+  emailId: string;
 }
 
 interface TokenPair {
@@ -10,30 +12,35 @@ interface TokenPair {
   refreshToken: string;
 }
 
-export const generateAccessToken = (payload: TokenPayload): string => {
-  const accessTokenSecret = process.env.JWT_ACCESS_SECRET || 'access-secret-key';
+console.log(env.JWT_SECRET_KEY);
+
+
+export const generateToken = (payload: TokenPayload, duration: number): string => {
+  const tokenSecret = env.JWT_SECRET_KEY!;
   
-  return jwt.sign(payload, accessTokenSecret, {
-    expiresIn: '15m', // Access token expires in 15 minutes
+  return jwt.sign(payload, tokenSecret, {
+    expiresIn: duration,
   });
+};
+
+export const generateAccessToken = (payload: TokenPayload): string => {
+  const accessToken = generateToken(payload, ACCESS_TOKEN_EXPIRY);  
+  return accessToken;
 };
 
 export const generateRefreshToken = (payload: TokenPayload): string => {
-  const refreshTokenSecret = process.env.JWT_REFRESH_SECRET || 'refresh-secret-key';
-  
-  return jwt.sign(payload, refreshTokenSecret, {
-    expiresIn: '7d', // Refresh token expires in 7 days
-  });
+  const refreshToken = generateToken(payload, REFRESH_TOKEN_EXPIRY);  
+  return refreshToken;
 };
 
 export const verifyAccessToken = (token: string): TokenPayload => {
-  const accessTokenSecret = process.env.JWT_ACCESS_SECRET || 'access-secret-key';
-  return jwt.verify(token, accessTokenSecret) as TokenPayload;
+  const tokenSecret = env.JWT_SECRET_KEY!;
+  return jwt.verify(token, tokenSecret) as TokenPayload;
 };
 
 export const verifyRefreshToken = (token: string): TokenPayload => {
-  const refreshTokenSecret = process.env.JWT_REFRESH_SECRET || 'refresh-secret-key';
-  return jwt.verify(token, refreshTokenSecret) as TokenPayload;
+  const tokenSecret = env.JWT_SECRET_KEY!;
+  return jwt.verify(token, tokenSecret) as TokenPayload;
 };
 
 export const generateTokenPair = (payload: TokenPayload): TokenPair => {

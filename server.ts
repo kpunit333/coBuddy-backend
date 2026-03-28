@@ -22,7 +22,7 @@ const PROTOCOL = env.SERVER_PROTOCOL;
 const URL = env.SERVER_URL;
 const PORT = env.SERVER_PORT;
 const VERSION = env.SERVER_VERSION;
-// Redirect v1/api to our routes
+// Redirect api/v1 to our routes
 const apiBasePath = `api/${VERSION}`;
 
 app.use(`/${apiBasePath}`, mainController);
