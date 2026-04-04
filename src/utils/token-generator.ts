@@ -4,6 +4,8 @@ import { env } from '../config/env';
 
 interface TokenPayload {
   userId: string;
+  username: string;
+  fullname: string;
   emailId: string;
 }
 

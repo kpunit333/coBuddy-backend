@@ -1,8 +1,12 @@
 import mongoose from 'mongoose';
-import { Request, Response } from 'express';
-import User from '../models/user.js';
-import { generateTokenPair, verifyRefreshToken } from '../utils/token-generator.js';
+import { CookieOptions, Request, Response } from 'express';
+import User from '../models/user.ts';
+import { generateTokenPair, verifyRefreshToken } from '../utils/token-generator.ts';
 import { ResponseBody } from '../utils/response.js';
+import { generateState, generateCodeVerifier, decodeIdToken } from 'arctic';
+import { google } from '../instances/googleInstance.ts';
+import QueryString from 'qs';
+import { ParsedQs } from 'qs';
 
 interface AuthRequestBody {
   username?: string;
@@ -26,6 +30,8 @@ export const refreshTokens = async (req: Request, res: Response): Promise<void> 
 
     const tokens = generateTokenPair({
       userId: payload.userId,
+      username: payload.username,
+      fullname: payload.fullname,
       emailId: payload.emailId,
     });
 
@@ -143,6 +149,8 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 
     const tokens = generateTokenPair({
       userId: user._id.toString(),
+      username: user.username,
+      fullname: user.fullname,
       emailId: user.emailId,
     });
 
@@ -180,3 +188,129 @@ export const login = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
+
+export const getGoogleLoginPage = async (req: any, res: Response) => {
+  console.log("g l p", req.body, req.user);
+  
+  if (req.user) return res.redirect("/");
+
+  const state = generateState();
+  const codeVerifier = generateCodeVerifier();
+  const url = google.createAuthorizationURL(state, codeVerifier, [
+    "openid", // this is called scopes, here we are giving openid, and profile
+    "profile", // openid gives tokens if needed, and profile gives user information
+    // we are telling google about the information that we require from user.
+    "email",
+  ]);
+
+  console.log("auth url", url);
+  
+
+  const cookieConfig: CookieOptions = {
+    httpOnly: true,
+    secure: true,
+    maxAge: 15 * 60 * 1000, // 15 minutes in milliseconds
+    sameSite: "lax", // this is such that when google redirects to our website, cookies are maintained
+  };
+
+  res.cookie("google_oauth_state", state, cookieConfig);
+  res.cookie("google_code_verifier", codeVerifier, cookieConfig);
+
+  console.log(state, codeVerifier);
+  
+  console.log("old header", res.header);
+  
+  
+  res.header({
+    "Access-Control-Allow-Origin": "http://localhost:5173",
+    "Access-Control-Allow-Credentials": "true",
+  });
+
+  console.log( "new header", res.header);
+  
+  res.redirect(url.toString());
+};
+
+//getGoogleLoginCallback
+export const getGoogleLoginCallback = async (req: Request, res: Response) => {
+  // google redirects with code, and state in query params
+  // we will use code to find out the user
+  console.log("cll bk", req);
+
+  const { code , state }: any = req.query;
+  console.log(code, state);
+
+  const {
+    google_oauth_state: storedState,
+    google_code_verifier: codeVerifier,
+  } = req.cookies;
+  
+
+  if (
+    !code ||
+    !state ||
+    !storedState ||
+    !codeVerifier ||
+    state !== storedState
+  ) {
+    res.send(401).json({
+      success: false,
+      message: "Couldn't login with Google because of invalid login attempt. Please try again!"
+    });
+    return res.redirect("/auth");
+  }
+
+  let tokens;
+  try {
+    // arctic will verify the code given by google with code verifier internally
+    tokens = await google.validateAuthorizationCode(code, codeVerifier);
+  } catch {
+    res.send(401).json({
+      success: false,
+      message: "Couldn't login with Google because of invalid login attempt. Please try again!"
+    });
+    return res.redirect("/auth");
+  }
+
+  console.log("token google: ", tokens);
+
+  const claims = decodeIdToken(tokens.idToken());
+  console.log("claim: ", claims);
+
+  // const { sub: googleUserId, name, email, picture } = claims;
+
+  //! there are few things that we should do
+  // Condition 1: User already exists with google's oauth linked
+  // Condition 2: User already exists with the same email but google's oauth isn't linked
+  // Condition 3: User doesn't exist.
+
+  // if user is already linked then we will get the user
+  // let user = await getUserWithOauthId({
+  //   provider: "google",
+  //   email,
+  // });
+
+  // // if user exists but user is not linked with oauth
+  // if (user && !user.providerAccountId) {
+  //   await linkUserWithOauth({
+  //     userId: user.id,
+  //     provider: "google",
+  //     providerAccountId: googleUserId,
+  //     avatarUrl: picture,
+  //   });
+  // }
+
+  // // if user doesn't exist
+  // if (!user) {
+  //   user = await createUserWithOauth({
+  //     name,
+  //     email,
+  //     provider: "google",
+  //     providerAccountId: googleUserId,
+  //     avatarUrl: picture,
+  //   });
+  // }
+  // await authenticateUser({ req, res, user, name, email });
+
+  res.redirect("/");
+};

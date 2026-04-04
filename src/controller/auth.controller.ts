@@ -7,5 +7,7 @@ const authController = Router();
 authController.post('/login', authService.login);
 authController.post('/signup', authService.signup);
 authController.post('/refresh', authService.refreshTokens);
+// authController.get('/google', authService.getGoogleLoginPage);
+// authController.get('/google/callback', authService.getGoogleLoginCallback);
 
 export default authController;
