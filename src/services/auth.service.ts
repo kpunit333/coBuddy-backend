@@ -1,12 +1,11 @@
-import mongoose from 'mongoose';
+import { decodeIdToken, generateCodeVerifier, generateState } from 'arctic';
 import { CookieOptions, Request, Response } from 'express';
-import User from '../models/user.ts';
-import { generateTokenPair, verifyRefreshToken } from '../utils/token-generator.ts';
-import { ResponseBody } from '../utils/response.js';
-import { generateState, generateCodeVerifier, decodeIdToken } from 'arctic';
+import mongoose from 'mongoose';
 import { google } from '../instances/googleInstance.ts';
-import QueryString from 'qs';
-import { ParsedQs } from 'qs';
+import User from '../models/user.ts';
+import { ResponseBody } from '../utils/response.ts';
+import { generateTokenPair, verifyRefreshToken } from '../utils/token-generator.ts';
+import { uploadMedia } from './media.service.ts';
 
 interface AuthRequestBody {
   username?: string;
@@ -56,6 +55,10 @@ export const refreshTokens = async (req: Request, res: Response): Promise<void> 
 
 export const signup = async (req: Request, res: Response): Promise<void> => {
 
+  console.log("pf img", req.file);
+  console.log("body ", req.body);
+  
+  
   const response = new ResponseBody();
   const session = await mongoose.startSession();
 
@@ -79,11 +82,24 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
+    let mediaResult = null;
+    if (req.file) {
+      mediaResult = await uploadMedia(req.file);
+      if (!mediaResult.success) {
+        response.setMessage('Failed to upload profile image');
+        res.status(400).json(response);
+        return;
+      }
+    }
+
+    console.log("media result ", mediaResult);
+
     const user = await User.create([{
       username: username.toLowerCase(),
       fullname,
       emailId: emailId.toLowerCase(),
       password,
+      profileImg: mediaResult ? mediaResult.data.secure_url : null,
     }], { session });
 
     response.setData({
@@ -92,6 +108,7 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
         username: user[0].username,
         fullname: user[0].fullname,
         emailId: user[0].emailId,
+        profileImg: user[0].profileImg,
       }
     });
 
@@ -160,6 +177,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
         username: user.username,
         fullname: user.fullname,
         emailId: user.emailId,
+        profileImg: user.profileImg,
       },
       tokens: {
         accessToken: tokens.accessToken,

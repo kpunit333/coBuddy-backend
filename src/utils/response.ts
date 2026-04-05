@@ -11,8 +11,8 @@ interface IResponseBody {
 export class ResponseBody implements IResponseBody {
     
     data: any | null;
-    success!: boolean | false;
-    message!: string | "Oops!! Something went wrong";
+    success: boolean = false;
+    message: string = "Oops!! Something went wrong";
 
     setMessage(message: string): void {
         this.message = message;

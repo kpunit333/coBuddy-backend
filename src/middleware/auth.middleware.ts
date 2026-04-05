@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
-import { verifyAccessToken } from '../utils/token-generator.js';
-import { ResponseBody } from '../utils/response.js';
+import { verifyAccessToken } from '../utils/token-generator.ts';
+import { ResponseBody } from '../utils/response.ts';
 
 export const authenticateToken = (req: Request, res: Response, next: NextFunction) => {
     

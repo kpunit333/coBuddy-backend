@@ -1,9 +1,9 @@
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import express, { Application } from 'express';
-import mainController from './mainController.js';
-import connectDB from './src/config/db.js';
-import { env } from './src/config/env.js';
+import mainController from './mainController.ts';
+import connectDB from './src/config/db.ts';
+import { env } from './src/config/env.ts';
 
 const dbName = env.MONGO_DB_NAME!;
 connectDB(dbName);
@@ -13,6 +13,7 @@ const app: Application = express();
 app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
+app.use('/src/uploads', express.static('uploads'));
 
 // Middleware for parsing JSON
 app.use(express.json());
